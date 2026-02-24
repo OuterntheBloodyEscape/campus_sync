@@ -222,7 +222,7 @@ class _libraryManagementState extends State<libraryManagement> {
                                 //),
                                // child:
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(left, top, right, bottom),
+                                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
                                   child: Flexible(
                                     child: Container(decoration: BoxDecoration(color: Colors.green),
                                       child: CupertinoSlidingSegmentedControl(
