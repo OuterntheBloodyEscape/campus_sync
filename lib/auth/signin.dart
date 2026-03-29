@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:campus_sync/CampusHomePage.dart';
+import 'package:campus_sync/campus_home_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:campus_sync/others/custom_snack_bar.dart';
