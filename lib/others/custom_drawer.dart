@@ -1,7 +1,7 @@
 import 'package:campus_sync/CampusHomePage.dart';
 import 'package:campus_sync/Canteen.dart';
 import 'package:campus_sync/LibraryManagement.dart';
-import 'package:campus_sync/LostFoundPage.dart';
+import 'package:campus_sync/lost_found_page.dart';
 import 'package:flutter/material.dart';
 import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/students/previous_year_notes/admin.dart';
