@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class LostFoundPage extends StatefulWidget {
   final Map<String, dynamic> ul;
-  const LostFoundPage({super.key, required this.ul});
+  final String logInUser;
+  const LostFoundPage({super.key, required this.ul, required this.logInUser});
   @override
   State<LostFoundPage> createState() => _LostFoundPageState();
 }
