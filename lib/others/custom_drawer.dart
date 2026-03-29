@@ -1,4 +1,4 @@
-import 'package:campus_sync/CampusHomePage.dart';
+import 'package:campus_sync/campus_home_page.dart';
 import 'package:campus_sync/Canteen.dart';
 import 'package:campus_sync/LibraryManagement.dart';
 import 'package:campus_sync/lost_found_page.dart';
