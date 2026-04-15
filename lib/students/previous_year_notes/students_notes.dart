@@ -84,17 +84,18 @@ class _NotesState extends State<Notes> {
         ),
         actions: [
           PopupMenuButton(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == "profile") {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => StudentProfile()),
                 );
               } else {
+                await FirebaseAuth.instance.signOut();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                  (route) => false,
+                      (route) => false,
                 );
               }
             },
