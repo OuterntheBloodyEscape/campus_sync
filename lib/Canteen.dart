@@ -1,5 +1,4 @@
 import 'package:campus_sync/Welcome.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/others/custom_drawer.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,13 +9,9 @@ import 'package:campus_sync/main.dart';
 import 'LibraryManagement.dart';
 
 class Canteen extends StatefulWidget {
-  final String logInUser;
-  final Map<String, User> ul;
-  final List<Note> nl;
+
   const Canteen({
-    required this.ul,
-    required this.logInUser,
-    required this.nl,
+
     super.key,
   });
 
@@ -40,16 +35,14 @@ Widget TopCards(
     children: [
       Material(
         color: Colors.transparent,
-        child: Flexible(
-          child: Ink.image(
-            image: AssetImage(asset),
-            height: 160,
-            fit: BoxFit.cover,
-            child: InkWell(
-              onTap: () {
-                if (availability == 'Available') openDialog(context);
-              },
-            ),
+        child: Ink.image(
+          image: AssetImage(asset),
+          height: 160,
+          fit: BoxFit.cover,
+          child: InkWell(
+            onTap: () {
+              if (availability == 'Available') openDialog(context);
+            },
           ),
         ),
       ),
@@ -62,37 +55,31 @@ Widget TopCards(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
                 ),
-                Flexible(child: SizedBox(height: 5)),
-                Flexible(
-                  child: Text(
-                    price,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
+                SizedBox(height: 5),
+                Text(
+                  price,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
                 ),
               ],
             ),
-            Flexible(
-              child: TextButton(
-                clipBehavior: Clip.antiAlias,
-                onPressed: () {},
-                child: Text(
-                  availability,
-                  style: TextStyle(
-                    color: checkAvailability(availability),
-                    fontWeight: FontWeight.bold,
-                  ),
+            TextButton(
+              clipBehavior: Clip.antiAlias,
+              onPressed: () {},
+              child: Text(
+                availability,
+                style: TextStyle(
+                  color: checkAvailability(availability),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -143,12 +130,7 @@ class _CanteenState extends State<Canteen> {
     double h = ScreenSize.height;
     double w = ScreenSize.width;
     return Scaffold(
-      drawer: CustomDrawer(
-        ul: widget.ul,
-        logInUser: widget.logInUser,
-        nl: widget.nl,
-        pageNo: 3,
-      ),
+      drawer: CustomDrawer( pageNo: 3),
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         flexibleSpace: Container(
@@ -168,9 +150,7 @@ class _CanteenState extends State<Canteen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => StudentProfile(
-                      ul: widget.ul,
-                      nl: widget.nl,
-                      logInUser: widget.logInUser,
+
                     ),
                   ),
                 );
@@ -179,9 +159,9 @@ class _CanteenState extends State<Canteen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        WelcomeScreen(ul: widget.ul, nl: widget.nl),
+                        WelcomeScreen(),
                   ),
-                  (route) => false,
+                      (route) => false,
                 );
               }
             },
@@ -249,33 +229,33 @@ class _CanteenState extends State<Canteen> {
             },
             suggestionsBuilder:
                 (BuildContext context, SearchController controller) {
-                  final List<Food> campusLocations = allFoods;
-                  final String keyword = controller.text.toLowerCase();
-                  final List<Food> filteredList = campusLocations.where((
-                    location,
+              final List<Food> campusLocations = allFoods;
+              final String keyword = controller.text.toLowerCase();
+              final List<Food> filteredList = campusLocations.where((
+                  location,
                   ) {
-                    return location.name.toLowerCase().contains(keyword);
-                  }).toList();
-                  if (filteredList.isEmpty) {
-                    return [
-                      const Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Text(
-                          'No matching found.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ];
-                  }
-                  return filteredList.map((location) {
-                    return ListTile(
-                      title: Text(location.name),
-                      onTap: () {
-                        controller.closeView(location.name);
-                      },
-                    );
-                  }).toList();
-                },
+                return location.name.toLowerCase().contains(keyword);
+              }).toList();
+              if (filteredList.isEmpty) {
+                return [
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Text(
+                      'No matching found.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ];
+              }
+              return filteredList.map((location) {
+                return ListTile(
+                  title: Text(location.name),
+                  onTap: () {
+                    controller.closeView(location.name);
+                  },
+                );
+              }).toList();
+            },
           ),
           ListTile(
             title: Text(

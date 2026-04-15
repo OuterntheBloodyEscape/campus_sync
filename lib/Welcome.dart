@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:campus_sync/auth/signin.dart';
 import 'package:campus_sync/auth/signup.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  final Map<String,User> ul;
-  final List<Note> nl;
-  const WelcomeScreen({required this.ul,required this.nl,super.key});
+
+  const WelcomeScreen({super.key});
 
   @override
   State<WelcomeScreen> createState() => _WelcomeScreenState();
@@ -21,7 +19,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: Column(
+        child: ListView(
           children: [
             Expanded(flex: 4, child: Image.asset("assets/Images/p1.png")),
             Expanded(
@@ -46,7 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         setState(() {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SignIn(ul: widget.ul,nl: widget.nl,)),
+                            MaterialPageRoute(builder: (context) => SignIn()),
                           );
                         });
                       },
@@ -72,7 +70,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         setState(() {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => SignUp(ul: widget.ul,)),
+                            MaterialPageRoute(builder: (context) => SignUp()),
                           );
                         });
                       },

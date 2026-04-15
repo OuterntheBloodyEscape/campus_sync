@@ -1,5 +1,4 @@
 import 'package:campus_sync/Welcome.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/others/custom_drawer.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,13 +9,8 @@ import 'package:campus_sync/main.dart';
 import 'Canteen.dart';
 
 class libraryManagement extends StatefulWidget {
-  final String logInUser;
-  final Map<String, User> ul;
-  final List<Note> nl;
+
   const libraryManagement({
-    required this.ul,
-    required this.logInUser,
-    required this.nl,
     super.key,
   });
 
@@ -104,9 +98,7 @@ class _libraryManagementState extends State<libraryManagement> {
 
     return Scaffold(
       drawer: CustomDrawer(
-        ul: widget.ul,
-        logInUser: widget.logInUser,
-        nl: widget.nl,
+
         pageNo: 2,
       ),
       appBar: AppBar(
@@ -128,9 +120,7 @@ class _libraryManagementState extends State<libraryManagement> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => StudentProfile(
-                      ul: widget.ul,
-                      nl: widget.nl,
-                      logInUser: widget.logInUser,
+
                     ),
                   ),
                 );
@@ -139,9 +129,9 @@ class _libraryManagementState extends State<libraryManagement> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        WelcomeScreen(ul: widget.ul, nl: widget.nl),
+                        WelcomeScreen(),
                   ),
-                      (route) => false,
+                  (route) => false,
                 );
               }
             },
@@ -161,7 +151,7 @@ class _libraryManagementState extends State<libraryManagement> {
                   ),
                 ),
                 PopupMenuItem(
-                  value: "Sign out",
+                  value: "signout",
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -196,78 +186,78 @@ class _libraryManagementState extends State<libraryManagement> {
                   viewSurfaceTintColor: Colors.transparent,
                   builder: (BuildContext context, SearchController controller) {
                     return Row(spacing: 10,//mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                             Flexible(
-                               child: Container(decoration: BoxDecoration(color: Colors.pink),
-                                      child: SearchBar(
-                                        autoFocus: true,
-                                        controller: controller,
-                                        hintText: 'Search by Title...',
-                                        leading: const Icon(Icons.search),
-                                        onTap: () => controller.openView(),
-                                        onChanged: (_) => controller.openView(),
-                                      ),
-                                    ),
-                             ),
+                      children: [
+                        Flexible(
+                          child: Container(//decoration: BoxDecoration(color: Colors.pink),
+                            child: SearchBar(
+                              autoFocus: true,
+                              controller: controller,
+                              hintText: 'Search by Title...',
+                              leading: const Icon(Icons.search),
+                              onTap: () => controller.openView(),
+                              onChanged: (_) => controller.openView(),
+                            ),
+                          ),
+                        ),
 
 
 
-                              //SizedBox(width: 50.0,),
-                             //Padding(
-                                //padding: const EdgeInsets.fromLTRB(
-                                 // 30.0,
-                                  //5.0,
-                                  //0,
-                                  //5.0,
-                                //),
-                               // child:
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
-                                  child: Flexible(
-                                    child: Container(decoration: BoxDecoration(color: Colors.green),
-                                      child: CupertinoSlidingSegmentedControl(
-                                            groupValue: groupValue,
-                                            thumbColor: Colors.blue,
-                                            backgroundColor: Colors.white,
-                                            children: {
-                                              0: Text('Name'),
-                                              1: Text('Author'),
-                                              2: Text('ISBN'),
-                                            },
-                                            padding: EdgeInsets.all(2.0),
-                                            onValueChanged: (groupValue) {
-                                              setState(() {
-                                                this.groupValue = groupValue;
-                                                if (this.groupValue == 0) {
-                                                  ISBN = false;
-                                                  Author = false;
-                                                  Title = true;
-                                                } else if (this.groupValue == 1) {
-                                                  ISBN = false;
-                                                  Author = true;
-                                                  Title = false;
-                                                } else if (this.groupValue == 2) {
-                                                  ISBN = true;
-                                                  Author = false;
-                                                  Title = false;
-                                                }
-                                              });
-                                            },
-                                          ),
-                                    ),
-                                  ),
-                                ),
+                        //SizedBox(width: 50.0,),
+                        //Padding(
+                        //padding: const EdgeInsets.fromLTRB(
+                        // 30.0,
+                        //5.0,
+                        //0,
+                        //5.0,
+                        //),
+                        // child:
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+                          child: Flexible(
+                            child: Container(//decoration: BoxDecoration(color: Colors.green),
+                              child: CupertinoSlidingSegmentedControl(
+                                groupValue: groupValue,
+                                thumbColor: Colors.blue,
+                                backgroundColor: Colors.white,
+                                children: {
+                                  0: Text('Name'),
+                                  1: Text('Author'),
+                                  2: Text('ISBN'),
+                                },
+                                padding: EdgeInsets.all(2.0),
+                                onValueChanged: (groupValue) {
+                                  setState(() {
+                                    this.groupValue = groupValue;
+                                    if (this.groupValue == 0) {
+                                      ISBN = false;
+                                      Author = false;
+                                      Title = true;
+                                    } else if (this.groupValue == 1) {
+                                      ISBN = false;
+                                      Author = true;
+                                      Title = false;
+                                    } else if (this.groupValue == 2) {
+                                      ISBN = true;
+                                      Author = false;
+                                      Title = false;
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
 
 
-                              //),
+                        //),
 
-                          ],
-                        );
-                        //SizedBox(height: 10),
+                      ],
+                    );
+                    //SizedBox(height: 10),
 
-                        //Card(child: SvgPicture.asset('assets/Images/document.svg')),
+                    //Card(child: SvgPicture.asset('assets/Images/document.svg')),
 
-                        // Card(child: Image.asset('assets/Images/CampusSync.png')),
+                    // Card(child: Image.asset('assets/Images/CampusSync.png')),
 
                   },
                   suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -279,8 +269,8 @@ class _libraryManagementState extends State<libraryManagement> {
 
                     // 3. Filter the list: keep only items that contain the typed keyword
                     final List<Book> filteredList = campusLocations.where((
-                      location,
-                    ) {
+                        location,
+                        ) {
                       if (Title)
                         return location.title.toLowerCase().contains(keyword);
                       else if (Author)

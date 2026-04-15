@@ -1,50 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:campus_sync/Welcome.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/others/custom_drawer.dart';
-import 'package:campus_sync/others/custom_snack_bar.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../others/custom_search_delagate.dart';
 import '../../others/custom_pair.dart';
 
 class NotesAdmin extends StatefulWidget {
-  final String logInUser;
-  final Map<String, User> ul;
-  final List<Note> nl;
-  const NotesAdmin({
-    required this.ul,
-    required this.logInUser,
-    required this.nl,
-    super.key,
-  });
+  const NotesAdmin({super.key});
 
   @override
   State<NotesAdmin> createState() => _NotesAdminState();
 }
 
 class _NotesAdminState extends State<NotesAdmin> {
+  final User? _cu = FirebaseAuth.instance.currentUser;
   late List<Pair<String, String>> l = [];
-  late List<int> ali = [];
-  @override
-  void initState() {
-    for (int i = 0; i < (widget.nl.length); i++) {
-      /*if (widget.ul[widget.logInUser]?.university != "N/A" &&
-              widget.ul[widget.logInUser]?.dept != "N/A" &&
-              widget.ul[widget.logInUser]?.semester != 0 ||
-          widget.ul[widget.logInUser]?.year != 0) {*/
-      if (widget.ul[widget.logInUser]?.university == widget.nl[i].university &&
-          widget.ul[widget.logInUser]?.dept == widget.nl[i].dept &&
-          widget.ul[widget.logInUser]?.year == widget.nl[i].year &&
-          widget.ul[widget.logInUser]?.semester == widget.nl[i].semester &&
-          !widget.nl[i].adminAccept) {
-        l.add(Pair(widget.nl[i].documentName, widget.nl[i].documentLink));
-        ali.add(i);
-      }
-      // }
-    }
-    super.initState();
-  }
+  late List<String> ali = [];
+  bool isLoding = true;
 
   final TextEditingController _dn = TextEditingController(),
       _dl = TextEditingController();
@@ -58,17 +33,41 @@ class _NotesAdminState extends State<NotesAdmin> {
     }
   }
 
+  void _getSubmitedNote() async {
+    QuerySnapshot qs = await FirebaseFirestore.instance
+        .collection("submitedNote")
+        .get();
+    setState(() {
+      qs.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        for (MapEntry<String, dynamic> me in data.entries) {
+          l.add(Pair(me.key, me.value));
+          ali.add(doc.id);
+        }
+        return data;
+      }).toList();
+      isLoding = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _dl.dispose();
+    _dn.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoding) {
+      _getSubmitedNote();
+    }
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
         title: Center(
-          child: Text(
-            "Admin",
-            style: TextStyle(color: Colors.white),
-          ),
+          child: Text("Admin", style: TextStyle(color: Colors.white)),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -85,22 +84,13 @@ class _NotesAdminState extends State<NotesAdmin> {
               if (value == "profile") {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentProfile(
-                      ul: widget.ul,
-                      nl: widget.nl,
-                      logInUser: widget.logInUser,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => StudentProfile()),
                 );
               } else {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        WelcomeScreen(ul: widget.ul, nl: widget.nl),
-                  ),
-                      (route) => false,
+                  MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                  (route) => false,
                 );
               }
             },
@@ -146,9 +136,12 @@ class _NotesAdminState extends State<NotesAdmin> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection("submitedNote")
+                        .doc(ali[index])
+                        .update({l[index].first: FieldValue.delete()});
                     setState(() {
-                     widget.nl.removeAt(ali[index]);
                       l.removeAt(index);
                       ali.removeAt(index);
                     });
@@ -156,9 +149,18 @@ class _NotesAdminState extends State<NotesAdmin> {
                   icon: Icon(Icons.close, color: Colors.red),
                 ),
                 IconButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await FirebaseFirestore.instance
+                        .collection("note")
+                        .doc(ali[index])
+                        .set({
+                          l[index].first: l[index].second,
+                        }, SetOptions(merge: true));
+                    await FirebaseFirestore.instance
+                        .collection("submitedNote")
+                        .doc(ali[index])
+                        .update({l[index].first: FieldValue.delete()});
                     setState(() {
-                      widget.nl[ali[index]].adminAccept = true;
                       l.removeAt(index);
                       ali.removeAt(index);
                     });
@@ -193,12 +195,7 @@ class _NotesAdminState extends State<NotesAdmin> {
           child: Icon(Icons.search, size: 30),
         ),
       ),
-      drawer: CustomDrawer(
-        ul: widget.ul,
-        nl: widget.nl,
-        logInUser: widget.logInUser,
-        pageNo: 6,
-      ),
+      drawer: CustomDrawer(pageNo: 6),
     );
   }
 }

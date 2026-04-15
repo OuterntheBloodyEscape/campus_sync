@@ -1,4 +1,4 @@
-import 'package:campus_sync/others/basic_custom_data_base.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -7,9 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:campus_sync/Welcome.dart';
 
 class splashScreen extends StatefulWidget {
-  final Map<String,User> ul;
-  final List<Note> nl;
-  const splashScreen({required this.ul,required this.nl,super.key});
+  const splashScreen({super.key});
 
   @override
   State<splashScreen> createState() => _SplashscreenState();
@@ -249,7 +247,7 @@ class _SplashscreenState extends State<splashScreen> {
                                           context,
                                           animation,
                                           secondaryAnimation,
-                                        ) => WelcomeScreen(ul: widget.ul, nl: widget.nl),
+                                        ) => WelcomeScreen(),
                                     transitionsBuilder:
                                         (
                                           context,

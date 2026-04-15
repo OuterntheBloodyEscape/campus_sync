@@ -1,34 +1,44 @@
-import 'package:campus_sync/campus_home_page.dart';
+import 'package:campus_sync/CampusHomePage.dart';
 import 'package:campus_sync/Canteen.dart';
 import 'package:campus_sync/LibraryManagement.dart';
-import 'package:campus_sync/lost_found_page.dart';
+import 'package:campus_sync/LostFoundPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/students/previous_year_notes/admin.dart';
 import 'package:campus_sync/students/previous_year_notes/students_notes.dart';
-import 'package:campus_sync/students/student_teacher/Subject_List.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class CustomDrawer extends StatefulWidget {
   final int pageNo;
-  final String logInUser;
-  final Map<String, User> ul;
-  final List<Note> nl;
-  const CustomDrawer({
-    required this.ul,
-    required this.logInUser,
-    required this.nl,
-    required this.pageNo,
-    super.key,
-  });
+
+  const CustomDrawer({required this.pageNo, super.key});
 
   @override
   State<CustomDrawer> createState() => _CustomDrawerState();
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
+  final User? _u = FirebaseAuth.instance.currentUser;
+  late Map<String, dynamic> _up = {};
+  bool isLoding = true;
+
+  void _getUserData() async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(_u!.uid)
+        .get();
+    setState(() {
+      _up = doc.data() as Map<String, dynamic>;
+      isLoding = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoding) {
+      _getUserData();
+    }
     return Drawer(
       child: ListView(
         children: [
@@ -62,11 +72,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        CampusHomePage(
-                          ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,
-                        ),
+                        CampusHomePage(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
@@ -95,11 +101,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        libraryManagement(
-                          ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,
-                        ),
+                        libraryManagement(),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
                           return FadeTransition(
@@ -127,11 +129,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        Canteen(
-                          ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,
-                        ),
+                        Canteen(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
@@ -160,9 +158,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        LostFoundPage(ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,),
+                        LostFoundPage(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
@@ -191,11 +187,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        Notes(
-                          ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,
-                        ),
+                        Notes(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
@@ -218,18 +210,14 @@ class _CustomDrawerState extends State<CustomDrawer> {
             selectedTileColor: Colors.blue.shade300,
             selectedColor: Colors.white,
             style: ListTileStyle.drawer,
-            enabled: (widget.ul[widget.logInUser]!.admin),
+            enabled: ((_up["role"] == "admin") ? true : false),
             onTap: () {
               if (widget.pageNo != 6) {
                 Navigator.push(
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        NotesAdmin(
-                          ul: widget.ul,
-                          logInUser: widget.logInUser,
-                          nl: widget.nl,
-                        ),
+                        NotesAdmin(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {

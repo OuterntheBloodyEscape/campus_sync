@@ -11,7 +11,7 @@ class CustomSnackBar {
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
-          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(2, 0, 10, 0),
@@ -20,10 +20,13 @@ class CustomSnackBar {
                 color: ((goodMessage) ? (Colors.green) : (Colors.red)),
               ),
             ),
-            Text(
-              message,
-              style: TextStyle(
-                color: ((goodMessage) ? (Colors.green) : (Colors.red)),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: ((goodMessage) ? (Colors.green) : (Colors.red)),
+                ),
+                softWrap: true,
               ),
             ),
           ],

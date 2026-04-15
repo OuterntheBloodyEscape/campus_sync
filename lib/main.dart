@@ -1,5 +1,7 @@
+// 1. Add these two imports at the top
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:campus_sync/Welcome.dart';
-import 'package:campus_sync/others/basic_custom_data_base.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,11 +10,15 @@ import 'LibraryManagement.dart';
 import 'Canteen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-void main() {
-  runApp(MyApp());
-  WidgetsFlutterBinding.ensureInitialized();
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+void main() async {
+  // 3. Add these two lines before runApp
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MyApp()); // (This line will look whatever your app's main widget is)
 }
 
 /*PreferredSizeWidget APPBAR(String title) => AppBar(
@@ -187,8 +193,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final Map<String, User> usersDatabase = {};
-  final List<Note> notesPreviousYearDatabase = [];
 
   // This widget is the root of your application.
   @override
@@ -201,7 +205,7 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.white,
         //brightness: Brightness.dark,
       ),
-      home: splashScreen(ul: usersDatabase, nl: notesPreviousYearDatabase),
+      home: splashScreen(),
     );
   }
 }
