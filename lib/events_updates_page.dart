@@ -1,4 +1,9 @@
+import 'package:campus_sync/others/custom_drawer.dart';
+import 'package:campus_sync/students/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import 'Welcome.dart';
 
 class EventsUpdatesPage extends StatefulWidget {
   const EventsUpdatesPage({super.key});
@@ -91,18 +96,69 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text("Events & Academic Updates", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(colors: [Color(0xFF1976D2), Color(0xFF42A5F5)]),
           ),
         ),
+        actions: [
+          PopupMenuButton(
+            onSelected: (value) async{
+              if (value == "profile") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => StudentProfile()),
+                );
+              } else {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                      (route) => false,
+                );
+              }
+            },
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  value: "profile",
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.account_circle, color: Colors.black),
+                      ),
+                      Text("Profile"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "signout",
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.logout, color: Colors.black),
+                      ),
+                      Text("Sign Out"),
+                    ],
+                  ),
+                ),
+              ];
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
         onPressed: () => _showAddDialog(),
         child: const Icon(Icons.add, color: Colors.white),
       ),
+      drawer: CustomDrawer(pageNo: 5),
       body: Column(
         children: [
           _buildSearchBar(),

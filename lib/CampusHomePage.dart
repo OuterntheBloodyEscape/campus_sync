@@ -1,11 +1,16 @@
 import 'package:campus_sync/Canteen.dart';
 import 'package:campus_sync/LibraryManagement.dart';
-import 'package:campus_sync/LostFoundPage.dart';
-import 'package:campus_sync/Welcome.dart';
+import 'package:campus_sync/events_updates_page.dart';
 import 'package:campus_sync/others/custom_drawer.dart';
+import 'package:campus_sync/students/previous_year_notes/admin.dart';
 import 'package:campus_sync/students/previous_year_notes/students_notes.dart';
 import 'package:campus_sync/students/profile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'LostFoundPage.dart';
+import 'Welcome.dart';
 
 class CampusHomePage extends StatefulWidget {
   const CampusHomePage({super.key});
@@ -15,33 +20,51 @@ class CampusHomePage extends StatefulWidget {
 }
 
 class _CampusHomePageState extends State<CampusHomePage> {
+  final User? _u = FirebaseAuth.instance.currentUser;
+  late Map<String, dynamic> _up = {};
+  bool isLoding = true;
   bool isDarkMode = false;
   final TextEditingController searchController = TextEditingController();
 
-  final List<Map<String, dynamic>> features = [
-    {"title": "Smart Library ", "icon": Icons.local_library},
+  late final List<Map<String, dynamic>> features = [
+    {"title": "Smart Library", "icon": Icons.local_library},
     {"title": "Canteen", "icon": Icons.restaurant},
-    //{"title": "Smart Attendance", "icon": Icons.check_circle},
-    //{"title": "Events & Academic Updates", "icon": Icons.event},
-    //{"title": "Vacant Room Utilization", "icon": Icons.meeting_room},
     {"title": "Lost & Found", "icon": Icons.search},
+    {"title": "Events & Academic Updates", "icon": Icons.event},
     {"title": "Previous Year Notes", "icon": Icons.menu_book},
+    if (_up["role"] == "students-admin")
+      {
+        "title": "Previous Year Notes Admin",
+        "icon": Icons.admin_panel_settings,
+      },
   ];
+
+  void _getUserData() async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(_u!.uid)
+        .get();
+    setState(() {
+      _up = doc.data() as Map<String, dynamic>;
+      isLoding = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoding) {
+      _getUserData();
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.white,
       ),
-      darkTheme: ThemeData.dark(),
       home: Scaffold(
         appBar: _buildAppBar(),
-        drawer: CustomDrawer(pageNo: 1),
         body: _buildBody(),
+        drawer: CustomDrawer(pageNo: 1),
       ),
     );
   }
@@ -66,19 +89,17 @@ class _CampusHomePageState extends State<CampusHomePage> {
       ),
       actions: [
         PopupMenuButton(
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == "profile") {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => StudentProfile()),
               );
             } else {
+              await FirebaseAuth.instance.signOut();
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      WelcomeScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => WelcomeScreen()),
                 (route) => false,
               );
             }
@@ -131,14 +152,14 @@ class _CampusHomePageState extends State<CampusHomePage> {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Color(0xFF1976D2), Color(0xFF42A5F5)],
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
             ),
           ),
           child: const Column(
@@ -168,8 +189,9 @@ class _CampusHomePageState extends State<CampusHomePage> {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
               hintText: "Search features...",
+              hintStyle: TextStyle(),
               filled: true,
               fillColor: Colors.blue.shade50,
               border: OutlineInputBorder(
@@ -188,9 +210,9 @@ class _CampusHomePageState extends State<CampusHomePage> {
             builder: (context, constraints) {
               int crossAxisCount = 2;
               if (constraints.maxWidth > 900) {
-                crossAxisCount = 4; // Web/Desktop
+                crossAxisCount = 4;
               } else if (constraints.maxWidth > 600) {
-                crossAxisCount = 3; // Tablet
+                crossAxisCount = 3;
               }
 
               return GridView.builder(
@@ -222,11 +244,11 @@ class _CampusHomePageState extends State<CampusHomePage> {
         decoration: BoxDecoration(
           color: Colors.blue.shade50,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 4,
-              offset: Offset(2, 3),
+              offset: const Offset(2, 3),
             ),
           ],
         ),
@@ -238,7 +260,11 @@ class _CampusHomePageState extends State<CampusHomePage> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
             ),
           ],
         ),
@@ -247,38 +273,80 @@ class _CampusHomePageState extends State<CampusHomePage> {
   }
 
   void _openPage(String title) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) {
-          if (title == 'Smart Library ')
-            return libraryManagement();
-          else if (title == 'Canteen')
-            return Canteen();
-          else if (title == 'Lost & Found')
-            return LostFoundPage();
-          else
-            return Notes();
-        },
-      ),
-    );
-  }
-}
-
-class SimplePage extends StatelessWidget {
-  final String title;
-  const SimplePage({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+    if (title == "Smart Library") {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              libraryManagement(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
         ),
-      ),
-    );
+      );
+    } else if (title == "Canteen") {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => Canteen(),
+
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
+        ),
+      );
+    } else if (title == "Lost & Found") {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              LostFoundPage(),
+
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
+        ),
+      );
+    } else if (title == "Events & Academic Updates") {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              EventsUpdatesPage(),
+
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
+        ),
+      );
+    } else if (title == "Previous Year Notes") {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => Notes(),
+
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => NotesAdmin(),
+
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: 800.ms,
+        ),
+      );
+    }
   }
 }
