@@ -113,7 +113,6 @@ class _SignUpState extends State<SignUp> {
                               labelText: "Full-Name",
                               hintText: "Name",
                               labelStyle: TextStyle(color: nbc),
-
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(40),
                                 borderSide: BorderSide(color: nbc, width: 1),

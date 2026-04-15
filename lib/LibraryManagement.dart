@@ -3,16 +3,13 @@ import 'package:campus_sync/others/custom_drawer.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:campus_sync/main.dart';
-import 'Canteen.dart';
+import 'Book_info.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 
 class libraryManagement extends StatefulWidget {
-
-  const libraryManagement({
-    super.key,
-  });
+  const libraryManagement({super.key});
 
   @override
   State<libraryManagement> createState() => _libraryManagementState();
@@ -25,7 +22,8 @@ MaterialColor checkAvailability(String availability) {
     return Colors.red;
 }
 
-Widget TopCards(String asset, String availability) => Card(
+
+Widget TopCards(String asset, String availability, String link) => Card(
   elevation: 5,
   shadowColor: Colors.grey,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -35,13 +33,42 @@ Widget TopCards(String asset, String availability) => Card(
     children: [
       Material(
         color: Colors.transparent,
-        child: Ink.image(
-          image: AssetImage(asset),
-          width: double.infinity,
-          height: 500,
-          fit: BoxFit.cover,
-          child: InkWell(onTap: () {}),
-        ),
+        child: asset.isEmpty
+
+            ? InkWell(
+                onTap: () async {
+                  final Uri url = Uri.parse(link);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 500,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.book, size: 100, color: Colors.grey),
+                ),
+              )
+
+            : Ink.image(
+                image: NetworkImage(asset),
+                width: double.infinity,
+                height: 500,
+                fit: BoxFit.cover,
+                child: InkWell(
+                  onTap: () async {
+                    final Uri url = Uri.parse(link);
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else {
+                      print("Could not launch $link");
+                    }
+                  },
+                ),
+              ),
       ),
       OverflowBar(
         alignment: MainAxisAlignment.end,
@@ -63,27 +90,49 @@ Widget TopCards(String asset, String availability) => Card(
   ),
 );
 
-class Book {
-  final String title;
-  final String author;
-  final String isbn;
-  const Book({required this.title, required this.author, required this.isbn});
-}
+Widget buildUsers(List<Book> books) => ListView.builder(
+  shrinkWrap: true,
+  physics:
+      const NeverScrollableScrollPhysics(),
+  itemCount: books.length,
+  itemBuilder: (context, index) {
+    final book = books[index];
+    return TopCards(book.cover, 'Available', book.link);
+  },
+);
+Future<List<Book>> books = getBooks();
+Future<List<Book>> getBooks() async {
 
-const allBooks = [
-  Book(
-    title: 'Fundamentals of Physics',
-    author: 'Halliday & Resnick',
-    isbn: '00724105101114',
-  ),
-  Book(
-    title: 'Fundamentals of Chemistry',
-    author: 'Aristotle',
-    isbn: '00724105101116',
-  ),
-  Book(title: 'Harry Potter', author: 'J. K. Rawlings', isbn: '0072410510130'),
-];
-List<Book> books = allBooks;
+  const url = 'https://campussync-a8ebc-default-rtdb.firebaseio.com/.json';
+
+  final response = await http.get(Uri.parse(url));
+  final dynamic body = json.decode(response.body);
+
+  List<Book> loadedBooks = [];
+
+  // Safety check if database returns nothing
+  if (body == null) return loadedBooks;
+
+  // Firebase sees 0, 1, 2 and sends us a clean List!
+  if (body is List) {
+    for (var item in body) {
+      // item is the individual book map (e.g., Jane Austen's book)
+      if (item != null) {
+        loadedBooks.add(Book.fromJson(item));
+      }
+    }
+  }
+  // Just in case Firebase randomly sends it as a Map dictionary
+  else if (body is Map) {
+    body.forEach((key, value) {
+      if (value != null && value is Map) {
+        loadedBooks.add(Book.fromJson(value));
+      }
+    });
+  }
+
+  return loadedBooks;
+}
 
 class _libraryManagementState extends State<libraryManagement> {
   bool Title = true;
@@ -97,10 +146,7 @@ class _libraryManagementState extends State<libraryManagement> {
     double w = ScreenSize.width;
 
     return Scaffold(
-      drawer: CustomDrawer(
-
-        pageNo: 2,
-      ),
+      drawer: CustomDrawer(pageNo: 2),
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         flexibleSpace: Container(
@@ -118,19 +164,12 @@ class _libraryManagementState extends State<libraryManagement> {
               if (value == "profile") {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => StudentProfile(
-
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => StudentProfile()),
                 );
               } else {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        WelcomeScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => WelcomeScreen()),
                   (route) => false,
                 );
               }
@@ -185,10 +224,13 @@ class _libraryManagementState extends State<libraryManagement> {
                   //viewElevation: 100.0,
                   viewSurfaceTintColor: Colors.transparent,
                   builder: (BuildContext context, SearchController controller) {
-                    return Row(spacing: 10,//mainAxisAlignment: MainAxisAlignment.center,
+                    return Row(
+                      spacing:
+                          10, //mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Flexible(
-                          child: Container(//decoration: BoxDecoration(color: Colors.pink),
+                          child: Container(
+                            //decoration: BoxDecoration(color: Colors.pink),
                             child: SearchBar(
                               autoFocus: true,
                               controller: controller,
@@ -199,8 +241,6 @@ class _libraryManagementState extends State<libraryManagement> {
                             ),
                           ),
                         ),
-
-
 
                         //SizedBox(width: 50.0,),
                         //Padding(
@@ -214,7 +254,8 @@ class _libraryManagementState extends State<libraryManagement> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
                           child: Flexible(
-                            child: Container(//decoration: BoxDecoration(color: Colors.green),
+                            child: Container(
+                              //decoration: BoxDecoration(color: Colors.green),
                               child: CupertinoSlidingSegmentedControl(
                                 groupValue: groupValue,
                                 thumbColor: Colors.blue,
@@ -248,9 +289,7 @@ class _libraryManagementState extends State<libraryManagement> {
                           ),
                         ),
 
-
                         //),
-
                       ],
                     );
                     //SizedBox(height: 10),
@@ -258,73 +297,100 @@ class _libraryManagementState extends State<libraryManagement> {
                     //Card(child: SvgPicture.asset('assets/Images/document.svg')),
 
                     // Card(child: Image.asset('assets/Images/CampusSync.png')),
-
                   },
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    // 1. Your raw data
-                    final List<Book> campusLocations = allBooks;
+                  suggestionsBuilder:
+                      (
+                        BuildContext context,
+                        SearchController controller,
+                      ) async {
 
-                    // 2. Get what the user is currently typing (converted to lowercase)
-                    final String keyword = controller.text.toLowerCase();
+                        final Future<List<Book>> campusLocations = books;
 
-                    // 3. Filter the list: keep only items that contain the typed keyword
-                    final List<Book> filteredList = campusLocations.where((
-                        location,
+
+                        final String keyword = controller.text.toLowerCase();
+
+
+                        List<Book> resolvedList = await campusLocations;
+
+                        List<Book> filteredList = resolvedList.where((
+                          location,
                         ) {
-                      if (Title)
-                        return location.title.toLowerCase().contains(keyword);
-                      else if (Author)
-                        return location.author.toLowerCase().contains(keyword);
-                      else if (ISBN)
-                        return location.isbn.toLowerCase().contains(keyword);
-                      return false;
-                    }).toList();
-
-                    // 4. If nothing matches, show a friendly message
-                    if (filteredList.isEmpty) {
-                      return [
-                        const Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: Text(
-                            'No matching books found.',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ];
-                    }
-
-                    // 5. Map the filtered list into ListTiles
-                    return filteredList.map((location) {
-                      return ListTile(
-                        title: Text(location.title),
-                        subtitle: Text(location.author),
-                        // Optional: Highlight the search icon to make it look active
-                        onTap: () {
-                          // Update the search bar with the selected text and close the menu
                           if (Title)
-                            return controller.closeView(location.title);
+                            return location.title.toLowerCase().contains(
+                              keyword,
+                            );
                           else if (Author)
-                            return controller.closeView(location.author);
+                            return location.author.toLowerCase().contains(
+                              keyword,
+                            );
                           else if (ISBN)
-                            return controller.closeView(location.isbn);
+                            return location.isbn.toLowerCase().contains(
+                              keyword,
+                            );
+                          return false;
+                        }).toList();
 
-                          // TODO: Add your navigation or logic here!
-                          // print("User selected: $location");
-                        },
-                      );
-                    }).toList();
-                  },
+
+                        if (filteredList.isEmpty) {
+                          return [
+                            const Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: Text(
+                                'No matching books found.',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ];
+                        }
+
+
+                        return filteredList.map((location) {
+                          return ListTile(
+                            title: Text(location.title),
+                            subtitle: Text(location.author),
+
+                            onTap: () async {
+
+                              if (Title)
+                                return controller.closeView(location.title);
+                              else if (Author)
+                                return controller.closeView(location.author);
+                              else if (ISBN)
+                                return controller.closeView(location.isbn);
+
+
+
+                            },
+                          );
+                        }).toList();
+                      },
                 ),
               ),
               ListTile(
-                title: Text('Most Searched...'),
+                title: Text(
+                  'Most Searched...',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 selectedColor: Colors.grey[350],
               ),
-              TopCards('assets/Images/physics.jpg', 'Available'),
-              SizedBox(height: 10),
-              TopCards('assets/Images/chemistry.jpg', 'Available'),
-              SizedBox(height: 10),
-              TopCards('assets/Images/Harry potter.jpg', 'Unavailable'),
+              //buildUsers(books),
+              FutureBuilder<List<Book>>(
+                future: books,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text("Error: ${snapshot.error}"));
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return buildUsers(snapshot.data!);
+                  } else {
+                    return const Center(child: Text("No books available."));
+                  }
+                },
+              ),
             ],
           ),
         ],
