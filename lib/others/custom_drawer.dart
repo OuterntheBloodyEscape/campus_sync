@@ -2,6 +2,7 @@ import 'package:campus_sync/CampusHomePage.dart';
 import 'package:campus_sync/Canteen.dart';
 import 'package:campus_sync/LibraryManagement.dart';
 import 'package:campus_sync/LostFoundPage.dart';
+import 'package:campus_sync/events_updates_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -175,8 +176,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           ListTile(
             splashColor: Colors.blue,
-            leading: Icon(Icons.menu_book),
-            title: Text("Previous Year Notes"),
+            leading: Icon(Icons.event),
+            title: Text("Events & Academic Updates"),
             selected: (widget.pageNo == 5),
             selectedTileColor: Colors.blue.shade300,
             selectedColor: Colors.white,
@@ -187,7 +188,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        Notes(),
+                        EventsUpdatesPage(),
 
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
@@ -204,15 +205,44 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ),
           ListTile(
             splashColor: Colors.blue,
-            leading: Icon(Icons.admin_panel_settings),
-            title: Text("Previous Year Notes Admin"),
+            leading: Icon(Icons.menu_book),
+            title: Text("Previous Year Notes"),
             selected: (widget.pageNo == 6),
             selectedTileColor: Colors.blue.shade300,
             selectedColor: Colors.white,
             style: ListTileStyle.drawer,
-            enabled: ((_up["role"] == "admin") ? true : false),
             onTap: () {
               if (widget.pageNo != 6) {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        Notes(),
+
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    transitionDuration: 800.ms,
+                  ),
+                );
+              }
+            },
+          ),
+          ListTile(
+            splashColor: Colors.blue,
+            leading: Icon(Icons.admin_panel_settings),
+            title: Text("Previous Year Notes Admin"),
+            selected: (widget.pageNo == 7),
+            selectedTileColor: Colors.blue.shade300,
+            selectedColor: Colors.white,
+            style: ListTileStyle.drawer,
+            enabled: (_up["role"] == "admin"),
+            onTap: () {
+              if (widget.pageNo != 7) {
                 Navigator.push(
                   context,
                   PageRouteBuilder(

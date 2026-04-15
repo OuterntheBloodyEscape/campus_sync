@@ -17,13 +17,15 @@ class _SignUpState extends State<SignUp> {
   final FirebaseAuth _fa = FirebaseAuth.instance;
   final TextEditingController _em = TextEditingController(),
       _pass = TextEditingController(),
-      _CPass = TextEditingController();
+      _CPass = TextEditingController(),
+      _name = TextEditingController();
   double aeh = 1000, aop = 0;
   bool hidePass = true, hidePass_c = true;
   Color embc = Colors.black,
       pbc = Colors.black,
       cpbc = Colors.black,
-      sc = Colors.black;
+      sc = Colors.black,
+      nbc = Colors.black;
 
   @override
   void initState() {
@@ -104,6 +106,26 @@ class _SignUpState extends State<SignUp> {
                       children: [
                         Padding(
                           padding: EdgeInsets.fromLTRB(20, 70, 20, 0),
+                          child: TextFormField(
+                            keyboardType: TextInputType.name,
+                            controller: _name,
+                            decoration: InputDecoration(
+                              labelText: "Full-Name",
+                              hintText: "Name",
+                              labelStyle: TextStyle(color: nbc),
+
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(40),
+                                borderSide: BorderSide(color: nbc, width: 1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: nbc, width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
                           child: TextFormField(
                             keyboardType: TextInputType.emailAddress,
                             controller: _em,
@@ -196,7 +218,17 @@ class _SignUpState extends State<SignUp> {
                             ),
                             onPressed: () {
                               setState(() async {
-                                if (_em.text.isEmpty || _em.text.trim().isEmpty) {
+                                if (_name.text.isEmpty ||
+                                    _name.text.trim().isEmpty) {
+                                  nbc = Colors.red.shade800;
+                                  CustomSnackBar().snackBarMessage(
+                                    context: context,
+                                    message: "Full-Name should be fill",
+                                    goodMessage: false,
+                                  );
+                                }
+                                else if (_em.text.isEmpty ||
+                                    _em.text.trim().isEmpty) {
                                   embc = Colors.red.shade800;
                                   CustomSnackBar().snackBarMessage(
                                     context: context,
@@ -245,7 +277,8 @@ class _SignUpState extends State<SignUp> {
                                     if (e.code == 'weak-password') {
                                       message =
                                           'The password provided is too weak. (Needs at least 6 characters)';
-                                    } else if (e.code == 'email-already-in-use') {
+                                    } else if (e.code ==
+                                        'email-already-in-use') {
                                       message =
                                           'An account already exists for that email.';
                                     } else if (e.code == 'invalid-email') {
@@ -256,7 +289,8 @@ class _SignUpState extends State<SignUp> {
                                     }
                                     u = null;
                                   } catch (e) {
-                                    message = "An unexpected error occurred: $e";
+                                    message =
+                                        "An unexpected error occurred: $e";
                                     u = null;
                                   }
 
@@ -265,7 +299,7 @@ class _SignUpState extends State<SignUp> {
                                         .collection("users")
                                         .doc(u.uid)
                                         .set({
-                                          "name": "Name",
+                                          "name": _name.text,
                                           "uni": "University",
                                           "dept": "Dept",
                                           "year": "Year",
