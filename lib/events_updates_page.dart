@@ -2,7 +2,6 @@ import 'package:campus_sync/others/custom_drawer.dart';
 import 'package:campus_sync/students/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import 'Welcome.dart';
 
 class EventsUpdatesPage extends StatefulWidget {
@@ -15,7 +14,6 @@ class EventsUpdatesPage extends StatefulWidget {
 class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
   final TextEditingController searchController = TextEditingController();
   String selectedCategory = "All";
-
 
   final List<Map<String, dynamic>> updates = [
     {
@@ -38,7 +36,6 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
     },
   ];
 
-
   void _addUpdate(String title, String description, String category) {
     setState(() {
       updates.insert(0, {
@@ -49,38 +46,6 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
       });
     });
   }
-
-  void _deleteUpdate(int index, List<Map<String, dynamic>> filteredList) {
-    final itemToRemove = filteredList[index];
-    setState(() {
-      updates.remove(itemToRemove);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Update deleted successfully"), behavior: SnackBarBehavior.floating),
-    );
-  }
-
-  void _confirmDelete(int index, List<Map<String, dynamic>> filteredList) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Delete Update?"),
-        content: const Text("Are you sure you want to remove this update? This action cannot be undone."),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-          TextButton(
-            onPressed: () {
-              _deleteUpdate(index, filteredList);
-              Navigator.pop(ctx);
-            },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -97,60 +62,16 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
       appBar: AppBar(
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text("Events & Academic Updates", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text("Events & Academic Updates",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Color(0xFF1976D2), Color(0xFF42A5F5)]),
+            gradient: LinearGradient(
+                colors: [Color(0xFF1976D2), Color(0xFF42A5F5)]),
           ),
         ),
         actions: [
-          PopupMenuButton(
-            onSelected: (value) async{
-              if (value == "profile") {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => StudentProfile()),
-                );
-              } else {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                      (route) => false,
-                );
-              }
-            },
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  value: "profile",
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(Icons.account_circle, color: Colors.black),
-                      ),
-                      Text("Profile"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: "signout",
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(Icons.logout, color: Colors.black),
-                      ),
-                      Text("Sign Out"),
-                    ],
-                  ),
-                ),
-              ];
-            },
-          ),
+          _buildProfileMenu(context),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -171,7 +92,7 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
               padding: const EdgeInsets.all(16),
               itemCount: filteredUpdates.length,
               itemBuilder: (context, index) {
-                return _updateCard(filteredUpdates, index);
+                return _updateCard(filteredUpdates[index]);
               },
             ),
           ),
@@ -191,7 +112,9 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
           hintText: "Search updates...",
           filled: true,
           fillColor: Colors.blue.shade50,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide.none),
         ),
       ),
     );
@@ -214,8 +137,7 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
     );
   }
 
-  Widget _updateCard(List<Map<String, dynamic>> filteredList, int index) {
-    final update = filteredList[index];
+  Widget _updateCard(Map<String, dynamic> update) {
     final isEvent = update["category"] == "Event";
 
     return Card(
@@ -228,31 +150,71 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(isEvent ? Icons.event : Icons.school, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Text(update["category"], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                  ],
-                ),
-
-                IconButton(
-                  onPressed: () => _confirmDelete(index, filteredList),
-                  icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                Icon(isEvent ? Icons.event : Icons.school, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  update["category"],
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blue),
                 ),
               ],
             ),
             const Divider(),
-            Text(update["title"], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+            Text(update["title"],
+                style:
+                const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
             const SizedBox(height: 8),
-            Text(update["description"], style: const TextStyle(color: Colors.black87)),
+            Text(update["description"],
+                style: const TextStyle(color: Colors.black87)),
             const SizedBox(height: 12),
-            Text("Posted: ${update["date"]}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            Text("Posted: ${update["date"]}",
+                style: const TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileMenu(BuildContext context) {
+    return PopupMenuButton(
+      onSelected: (value) async {
+        if (value == "profile") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => StudentProfile()),
+          );
+        } else {
+          await FirebaseAuth.instance.signOut();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => WelcomeScreen()),
+                (route) => false,
+          );
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: "profile",
+          child: Row(
+            children: [
+              Icon(Icons.account_circle, color: Colors.black),
+              SizedBox(width: 8),
+              Text("Profile"),
+            ],
+          ),
+        ),
+        const PopupMenuItem(
+          value: "signout",
+          child: Row(
+            children: [
+              Icon(Icons.logout, color: Colors.black),
+              SizedBox(width: 8),
+              Text("Sign Out"),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -268,17 +230,24 @@ class _EventsUpdatesPageState extends State<EventsUpdatesPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Title")),
-            TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description")),
+            TextField(
+                controller: titleCtrl,
+                decoration: const InputDecoration(labelText: "Title")),
+            TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(labelText: "Description")),
             DropdownButtonFormField(
               value: category,
-              items: ["Event", "Academic"].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+              items: ["Event", "Academic"]
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
               onChanged: (val) => category = val.toString(),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
           ElevatedButton(
             onPressed: () {
               if (titleCtrl.text.isNotEmpty) {
