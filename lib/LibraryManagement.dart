@@ -1,6 +1,7 @@
 import 'package:campus_sync/Welcome.dart';
 import 'package:campus_sync/others/custom_drawer.dart';
 import 'package:campus_sync/students/profile.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'Book_info.dart';
@@ -160,17 +161,18 @@ class _libraryManagementState extends State<libraryManagement> {
         ),
         actions: [
           PopupMenuButton(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == "profile") {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => StudentProfile()),
                 );
               } else {
+                await FirebaseAuth.instance.signOut();
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                  (route) => false,
+                      (route) => false,
                 );
               }
             },
