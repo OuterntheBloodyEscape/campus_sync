@@ -196,7 +196,7 @@ class _NotesAdminState extends State<NotesAdmin> {
           child: Icon(Icons.search, size: 30),
         ),
       ),
-      drawer: CustomDrawer(pageNo: 6),
+      drawer: CustomDrawer(pageNo: 7),
     );
   }
 }

@@ -276,7 +276,7 @@ class _NotesState extends State<Notes> {
         ],
       ),
 
-      drawer: CustomDrawer(pageNo: 5),
+      drawer: CustomDrawer(pageNo: 6),
     );
   }
 }

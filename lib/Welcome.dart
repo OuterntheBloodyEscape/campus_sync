@@ -3,7 +3,6 @@ import 'package:campus_sync/auth/signin.dart';
 import 'package:campus_sync/auth/signup.dart';
 
 class WelcomeScreen extends StatefulWidget {
-
   const WelcomeScreen({super.key});
 
   @override
@@ -19,10 +18,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: ListView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(flex: 4, child: Image.asset("assets/Images/p1.png")),
-            Expanded(
+            Flexible(flex: 4, child: Image.asset("assets/Images/p1.png",fit: BoxFit.contain,)),
+            Flexible(
               flex: 2,
               child: Column(
                 children: [
